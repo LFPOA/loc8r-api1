@@ -9,41 +9,27 @@ if(process.env.NODE_ENV === 'production'){
 
 const homelist = (req, res) => {
   const path = '/api/locations';
-  const requestOptions = {
-    url: `${apiOptions.server}${path}`,
-    method: 'GET',
-    json: true,
-    qs: {
-      lng: 126.964062,
-      lat: 37.468769,
-      maxDistance: 200000
-    }
+  const requestOptions ={
+      url:`${apiOptions.server}${path}`,
+      method:'GET',
+      json: true,
+      qs:{
+          // lng: 1,
+          // lat: 1,
+          lng: 126.964062,
+          lat: 37.468769,
+          maxDistance: 2000000
+      }
   };
-
-  request(requestOptions, (err, { statusCode }, body) => {
-    if (err) {
-      console.error(`Request error: ${err}`);
-      return renderHomepage(req, res, []); // 에러 발생 시 빈 배열 반환
-    }
-
-    if (statusCode !== 200) {
-      console.error(`Error: Received status code ${statusCode}`);
-      return renderHomepage(req, res, []); // 비정상 응답 처리
-    }
-
-    // body가 배열인지 확인
-    if (!Array.isArray(body)) {
-      console.error(`Unexpected body format: ${typeof body}`);
-      return renderHomepage(req, res, []); // 형식이 예상과 다를 경우 빈 배열 반환
-    }
-
-    // 정상적으로 응답을 받았을 때
-    const data = body.map((item) => {
-      item.distance = formatDistance(item.distance);
-      return item;
-    });
-
-    renderHomepage(req, res, data);
+  request(requestOptions,(err, {statusCode}, body) => {
+    let data =[];
+    if(statusCode === 200 && body.length){
+        data = body.map( (item) =>{
+            item.distance = formatDistance(item.distance);
+            return item;
+        });
+    };
+    renderHomepage(req,res,data);
   });
 };
 
