@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const dbPassword = process.env.MONGODB_PASSWORD;
-const dbURI = `mongodb+srv://my_atlas_user:${dbPassword}@cluster0.bswpi.mongodb.net/Loc8r`;
+const dbURI = `mongodb+srv://my_atlas_user:${1234}@cluster0.bswpi.mongodb.net/Loc8r`;
 const readLine = require('readline');
 
 const connect = () => {
