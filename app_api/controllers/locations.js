@@ -4,50 +4,52 @@ const Loc = mongoose.model('Location');
 const locationsListByDistance = async (req, res) => {
   const lng = parseFloat(req.query.lng);
   const lat = parseFloat(req.query.lat);
+
+  // lng, lat 값 검증
+  if (isNaN(lng) || isNaN(lat)) {
+    return res.status(400).json({ 
+      message: "Valid 'lng' and 'lat' query parameters are required" 
+    });
+  }
+
   const near = {
     type: "Point",
     coordinates: [lng, lat]
   };
+
   const geoOptions = {
     distanceField: "distance.calculated",
     key: 'coords',
     spherical: true,
-    maxDistance: 2000000000000,
+    maxDistance: 2000000000000
   };
-  if (!lng || !lat) {
-    return res
-      .status(404)
-      .json({ "message": "lng and lat query parameters are required" });
-  }
 
   try {
     const results = await Loc.aggregate([
-      {
-        $geoNear: {
-          near,
-          ...geoOptions
-        }
-      }
+      { $geoNear: { near, ...geoOptions } }
     ]);
-    const locations = results.map(result => {
-      return {
-        _id: result._id,
-        name: result.name,
-        address: result.address,
-        rating: result.rating,
-        facilities: result.facilities,
-        distance: `${result.distance.calculated.toFixed()}`
-      }
-    });
-    res
-      .status(200)
-      .json(locations);
+
+    // 빈 배열인 경우 응답 처리
+    if (results.length === 0) {
+      return res.status(200).json([]);
+    }
+
+    const locations = results.map(result => ({
+      _id: result._id,
+      name: result.name,
+      address: result.address,
+      rating: result.rating,
+      facilities: result.facilities,
+      distance: `${result.distance.calculated.toFixed()}`
+    }));
+
+    res.status(200).json(locations);
   } catch (err) {
-    res
-      .status(404)
-      .json(err);
+    console.error('locationsListByDistance 오류:', err); // 로그 추가
+    res.status(500).json({ error: '서버 오류가 발생했습니다.' });
   }
 };
+
 
 const locationsCreate = async (req, res) => {
   try {
