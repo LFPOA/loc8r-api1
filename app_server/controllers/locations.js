@@ -9,27 +9,36 @@ if(process.env.NODE_ENV === 'production'){
 
 const homelist = (req, res) => {
   const path = '/api/locations';
-  const requestOptions ={
-      url:`${apiOptions.server}${path}`,
-      method:'GET',
-      json: true,
-      qs:{
-          // lng: 1,
-          // lat: 1,
-          lng: 126.964062,
-          lat: 37.468769,
-          maxDistance: 2000000
-      }
+  const requestOptions = {
+    url: `${apiOptions.server}${path}`,
+    method: 'GET',
+    json: true,
+    qs: {
+      lng: 126.964062,
+      lat: 37.468769,
+      maxDistance: 2000000,
+    },
   };
-  request(requestOptions,(err, {statusCode}, body) => {
-    let data =[];
-    if(statusCode === 200 && body.length){
-        data = body.map( (item) =>{
-            item.distance = formatDistance(item.distance);
-            return item;
-        });
-    };
-    renderHomepage(req,res,data);
+
+  request(requestOptions, (err, { statusCode }, body) => {
+    if (err) {
+      console.error('API 요청 오류:', err);
+      return res.status(500).send('서버 오류');
+    }
+
+    let data = [];
+
+    // 응답 형식이 배열인지 확인
+    if (statusCode === 200 && Array.isArray(body)) {
+      data = body.map((item) => {
+        item.distance = formatDistance(item.distance);
+        return item;
+      });
+    } else {
+      console.error('예상치 못한 응답 형식:', body);
+    }
+
+    renderHomepage(req, res, data);
   });
 };
 
