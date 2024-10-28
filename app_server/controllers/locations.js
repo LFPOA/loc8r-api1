@@ -4,7 +4,7 @@ const apiOptions = {
   server: 'http://localhost:3000'
 };
 if(process.env.NODE_ENV === 'production'){
-  apiOptions.server  = 'https://yourapi.com';
+  apiOptions.server  = 'https://loc8r-api1-1.onrender.com';
 }
 
 const homelist = (req, res) => {
@@ -18,51 +18,30 @@ const homelist = (req, res) => {
       lat: 37.468769,
       maxDistance: 2000000,
     },
-    followRedirect: false,  // 리다이렉트 방지
   };
 
-  // 요청 시작 로그
-  console.log('API 요청 시작:', requestOptions);
-
-  request(requestOptions, (err, { statusCode, headers } = {}, body) => {
-    // 요청 오류 로그
+  request(requestOptions, (err, { statusCode }, body) => {
     if (err) {
       console.error('API 요청 오류:', err);
       return res.status(500).send('서버 오류');
     }
 
-    // 응답 상태 코드 및 헤더 로그
-    console.log('응답 상태 코드:', statusCode);
-    console.log('응답 헤더:', headers);
-
-    // 리다이렉트 발생 시 로그
-    if (statusCode === 302 || statusCode === 301) {
-      console.error('리다이렉트 발생:', headers.location);
-      return res.status(400).send('잘못된 요청: 리다이렉트가 발생했습니다.');
-    }
-
-    // 응답 내용이 예상과 다를 때 로그
-    if (statusCode === 200) {
-      console.log('응답 본문:', body);
-    }
-
-    // 응답이 배열인지 확인하고 처리
     let data = [];
-    if (Array.isArray(body)) {
+
+    // 응답 형식이 배열인지 확인
+    if (statusCode === 200 && Array.isArray(body)) {
       data = body.map((item) => {
         item.distance = formatDistance(item.distance);
         return item;
       });
     } else {
       console.error('예상치 못한 응답 형식:', body);
-      return res.status(500).send('API 응답 오류');
     }
 
-    // 최종 데이터 로그 및 페이지 렌더링
-    console.log('렌더링할 데이터:', data);
     renderHomepage(req, res, data);
   });
 };
+
 
 
 const renderHomepage = (req, res, responseBody) => {
