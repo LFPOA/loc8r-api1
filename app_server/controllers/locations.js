@@ -9,41 +9,29 @@ if(process.env.NODE_ENV === 'production'){
 
 const homelist = (req, res) => {
   const path = '/api/locations';
-  const requestOptions = {
-    url: `${apiOptions.server}${path}`,
-    method: 'GET',
-    json: true,
-    qs: {
-      lng: 126.964062,
-      lat: 37.468769,
-      maxDistance: 2000000
-    }
+  const requestOptions ={
+      url:`${apiOptions.server}${path}`,
+      method:'GET',
+      json: true,
+      qs:{
+          // lng: 1,
+          // lat: 1,
+          lng: 126.964062,
+          lat: 37.468769,
+          maxDistance: 2000000
+      }
   };
-
-  request(requestOptions, (err, { statusCode } = {}, body) => {
-    let data = [];
-
-    // 에러 발생 시 처리
-    if (err) {
-      console.error('API 요청 실패:', err);
-      return res.status(500).send('서버 오류가 발생했습니다.');
-    }
-
-    // 상태 코드와 응답 데이터가 정상인지 확인
-    if (statusCode === 200 && Array.isArray(body)) {
-      data = body.map((item) => {
-        item.distance = formatDistance(item.distance);
-        return item;
-      });
-    } else {
-      console.warn('예상치 못한 응답 형식:', statusCode, body);
-    }
-
-    // 항상 페이지 렌더링
-    renderHomepage(req, res, data);
+  request(requestOptions,(err, {statusCode}, body) => {
+    let data =[];
+    if(statusCode === 200 && body.length){
+        data = body.map( (item) =>{
+            item.distance = formatDistance(item.distance);
+            return item;
+        });
+    };
+    renderHomepage(req,res,data);
   });
 };
-
 
 const renderHomepage = (req, res, responseBody) => {
   let message = null;
